@@ -10,7 +10,7 @@
 
 <script>
 export default {
-    name: 'Index',
+    name: 'UserChartIndex',
     components: {
         Chart: () => {
             return import('@/components/Charts/Keyboard')

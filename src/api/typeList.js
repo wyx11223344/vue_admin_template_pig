@@ -1,20 +1,20 @@
 /**
  * Created by WYX
- * Time 2019/8/22
+ * Time 2019/8/26
  */
 import request from '@/utils/request'
 
-export function userList(params) {
+export function typeListGet(params) {
     return request({
-        url: '/user/user_get',
+        url: '/web/list_get',
         method: 'POST',
         params
     })
 }
 
-export function userChange(params) {
+export function typeListChange(params) {
     return request({
-        url: '/user/user_change',
+        url: '/webChange/list_change',
         method: 'POST',
         params
     })

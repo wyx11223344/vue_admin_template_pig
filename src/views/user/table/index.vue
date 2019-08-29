@@ -115,6 +115,7 @@
 import { userList } from '@/api/userDate'
 
 export default {
+    name: 'UserTableIndex',
     components: {
         changeUser: () => {
             return import('./change')

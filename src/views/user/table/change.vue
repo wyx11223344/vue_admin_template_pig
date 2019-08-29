@@ -25,7 +25,7 @@
 <script>
 import { userChange } from '@/api/userDate'
 export default {
-    name: 'Change',
+    name: 'UserTableChange',
     props: {
         isShow: {
             type: Boolean

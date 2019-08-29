@@ -53,7 +53,16 @@ module.exports = {
             }
         }
     },
+    css: {
+        loaderOptions: {
+            less: {
+                javascriptEnabled: true
+            }
+        }
+    },
     chainWebpack(config) {
+        const types = ['vue-modules', 'vue', 'normal-modules', 'normal']
+        types.forEach(type => addStyleResource(config.module.rule('less').oneOf(type)))
         config.plugins.delete('preload') // TODO: need test
         config.plugins.delete('prefetch') // TODO: need test
 
@@ -130,4 +139,14 @@ module.exports = {
                 }
             )
     }
+}
+
+function addStyleResource(rule) {
+    rule.use('style-resource')
+        .loader('style-resources-loader')
+        .options({
+            patterns: [
+                path.resolve(__dirname, 'src/styles/variableless.less') // 需要全局导入的less
+            ]
+        })
 }

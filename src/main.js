@@ -13,6 +13,7 @@ import store from './store'
 import router from './router'
 import * as filters from './utils/filters'
 import echarts from 'echarts' // 引入echarts
+import directive from './directive/waves/index'
 
 import '@/icons' // icon
 import '@/permission' // permission control
@@ -33,6 +34,7 @@ Object.keys(filters).forEach((key) => {
  */
 
 // set ElementUI lang to EN
+Vue.use(directive)
 Vue.use(ElementUI)
 Vue.prototype.$echarts = echarts // 引入组件
 
