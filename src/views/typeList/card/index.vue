@@ -5,7 +5,7 @@
 <template lang="pug">
   .app-container
     .head-control
-      el-button(type="primary" size="mini" v-waves) 新增类型
+      el-button(type="primary" size="mini" v-waves @click="add_show()") 新增类型
         i(class="el-icon-plus el-icon--right")
       el-button(type="danger" size="mini" v-waves v-show="type === 1" @click="view_create_get(0)") 回收站
         i(class="el-icon-delete el-icon--right")
@@ -20,10 +20,12 @@
           :key="index"
           :sendObject="item"
           :type="type"
-          @list_get="view_create_get(type)")
+          @list_get="view_create_get(type)"
+          @change="show_change")
         div(v-if="typeList.length === 0")
           img(src="../../../assets/image/jump_man.gif" height="600" width="800")
           p.big_font 暂时没有数据哦
+    change-d-ia(v-model="changeShow" :oneObject="oneObject" :type="diaType" @list_get="view_create_get(type)")
 </template>
 
 <script>
@@ -33,6 +35,9 @@ export default {
     components: {
         oneEachCard: () => {
             return import('./eachCard')
+        },
+        changeDIa: () => {
+            return import('./changeDIa')
         }
     },
     data() {
@@ -43,7 +48,11 @@ export default {
             typeList: [],
             // 查询数据类型
             type: 1,
-            typeChanging: false
+            typeChanging: false,
+            // 展示修改抽屉
+            changeShow: false,
+            oneObject: {},
+            diaType: false
         }
     },
     mounted() {
@@ -70,7 +79,27 @@ export default {
                     this.$message.error(response.msg)
                 }
             })
+        },
+
+        /**
+         * 修改展开抽屉
+         * @param index
+         */
+        show_change(index) {
+            this.oneObject = index
+            this.diaType = true
+            this.changeShow = true
+        },
+
+        /**
+         * 新增展开抽屉
+         */
+        add_show() {
+            this.oneObject = {}
+            this.diaType = false
+            this.changeShow = true
         }
+
     }
 }
 </script>
@@ -116,5 +145,10 @@ export default {
   .slide-leave-to{
     transform: translateX(-10%);
     opacity: 0;
+  }
+  .svg_show{
+    width: 100px;
+    height: 100px;
+    transform: translate(5px,7px);
   }
 </style>

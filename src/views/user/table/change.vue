@@ -1,7 +1,8 @@
-<!--
-    Created by WYX
-    Time 2019/8/15
--->
+/**
+ * @author WYX
+ * @date 2019/9/10
+ * @Description:用户信息修改
+*/
 <template lang="pug">
   el-dialog(@close="close" title="修改用户信息" append-to-body :visible.sync="dialogVisible" width="50%")
     el-form(ref="userForm" :rules="rules" :model="form" label-width="80px" :status-icon="true")
@@ -19,7 +20,7 @@
           el-option(:value="0" label="未验证")
       el-form-item
         el-button(size="mini" type="primary" @click="submitForm('userForm')") 修改
-        el-button(size="mini") 重置
+        el-button(size="mini" @click="resetForm()") 重置
 </template>
 
 <script>
@@ -116,6 +117,13 @@ export default {
                     return false
                 }
             })
+        },
+
+        /**
+         * 表单重置
+         */
+        resetForm() {
+            this.form = JSON.parse(JSON.stringify(this.sendUser))
         }
     }
 }

@@ -7,12 +7,14 @@
     div(slot="header" class="clearfix")
       span {{sendObject.typename}}
       el-button(v-if="type === 1" style="float: right; padding: 3px 0 ; color: rgb(254,67,101)" type="text" @click="type_change(0)") 删除
-      el-button(v-if="type === 1" style="float: right; padding: 3px 5px" type="text") 修改
+      el-button(v-if="type === 1" style="float: right; padding: 3px 5px" type="text" @click="$emit('change',sendObject)") 修改
       el-button(v-if="type === 0" style="float: right; padding: 3px 0 ; color: rgb(254,67,101)" type="text" @click="type_change(-1)") 彻底删除
       el-button(v-if="type === 0" style="float: right; padding: 3px 5px" type="text" @click="type_change(1)") 恢复
     .main-show
       .left-show(:style="{backgroundColor:sendObject.bgc}")
-        img(:src="'http://static.mrwanmisshen.com/typeList/'+ sendObject.icon_name")
+        el-image(:src="'http://static.mrwanmisshen.com/typeList/'+ sendObject.icon_name")
+          div(slot="error" class="image-slot")
+            svg-icon.img-error(icon-class="pic")
       .right-show
         p 类型名称：{{sendObject.typename}}
         p 收支类别：{{sendObject.is_get === 0 ? '支出' : '收入'}}
@@ -28,10 +30,11 @@ export default {
     name: 'TypeListCardEachCard',
     props: {
         sendObject: {
-            type: Object
+            type: Object,
         },
         type: {
-            type: Number
+            type: Number,
+            default: 1
         }
     },
     methods: {
@@ -91,12 +94,12 @@ export default {
         height: 100px;
         border-radius: 5px;
         position: relative;
-        img{
-          position: absolute;
-          top: 10%;
-          left: 10%;
-          width: 80%;
-          height: 80%;
+        div{
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
         }
       }
       .right-show{
@@ -122,5 +125,9 @@ export default {
   }
   .yjstate1 {
     background: #42b983;
+  }
+  .img-error{
+    width: 70px;
+    height: 70px;
   }
 </style>

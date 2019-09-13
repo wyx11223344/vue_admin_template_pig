@@ -9,6 +9,7 @@ import Layout from '@/layout'
 /* 路由模块 */
 import user from './modules/user'
 import typeList from './modules/typeList'
+import picList from './modules/picList'
 
 export const constantRoutes = [
     {
@@ -41,6 +42,10 @@ export const constantRoutes = [
     {
     // 类型管理模块
         ...typeList
+    },
+    {
+    // 图片管理
+        ...picList
     },
     // 404 page must be placed at the end !!!
     { path: '*', redirect: '/404', hidden: true }

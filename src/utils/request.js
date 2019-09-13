@@ -1,10 +1,11 @@
 import axios from 'axios'
-import { Message } from 'element-ui'
+import { Loading, Message } from 'element-ui'
 import store from '@/store'
 import qs from 'qs'
 import md5 from 'js-md5'
 import sha1 from 'sha1'
 
+let loadingInstance
 function _getRandomString(len) {
     len = len || 32
     const $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678' // 默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1
@@ -50,6 +51,11 @@ service.interceptors.request.use(
         if (config.method === 'post') {
             config.data = qs.stringify(config.data) // post请求格式化数据
         }
+        loadingInstance = Loading.service({ // 加载动画
+            text: '玩命加载中...',
+            background: 'rgba(255, 255, 255, 0.6)'
+        })
+        store.commit('changeLoadingArr', store.getters.loadingArr + 1) // 动画加载个数加1
         return config
     },
     error => {
@@ -73,7 +79,10 @@ service.interceptors.response.use(
    */
     response => {
         const res = response.data
-
+        store.commit("changeLoadingArr", store.getters.loadingArr - 1) // 动画加载个数减1
+        if(store.getters.loadingArr === 0){
+          loadingInstance.close()
+        }
         // if the custom code is not 20000, it is judged as an error.
         if (res.code !== 200) {
             Message({
@@ -110,7 +119,10 @@ service.interceptors.response.use(
         }
     },
     err => {
-        console.log('err' + err) // for debug
+        store.commit("changeLoadingArr", store.getters.loadingArr - 1) // 动画加载个数减1
+        if(store.getters.loadingArr === 0){
+          loadingInstance.close()
+        }
         Message({
             message: err.message,
             type: 'error',

@@ -33,80 +33,79 @@
       <el-button type="success" size="mini" @click="reset()">重置</el-button>
     </div>
     <el-table
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column align="center" label="编号" width="95">
-        <template slot-scope="scope">
-          {{ (scope.$index+1) + (table_page.currentPage - 1)*table_page.pageSize }}
-        </template>
-      </el-table-column>
-      <el-table-column label="用户名" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.username }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="密码" align="center">
-        <template slot-scope="scope">
-          <span v-show="scope.row.show">{{ scope.row.password }}</span>
-          <span v-show="!scope.row.show">********</span>
-          <span class="rt show-pwd" @click="passShow(scope.$index)">
+          :data="list"
+          element-loading-text="Loading"
+          border
+          fit
+          highlight-current-row
+        >
+          <el-table-column align="center" label="编号" width="95">
+            <template slot-scope="scope">
+              {{ (scope.$index+1) + (table_page.currentPage - 1)*table_page.pageSize }}
+            </template>
+          </el-table-column>
+          <el-table-column label="用户名" align="center">
+            <template slot-scope="scope">
+              <span>{{ scope.row.username }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="密码" align="center">
+            <template slot-scope="scope">
+              <span v-show="scope.row.show">{{ scope.row.password }}</span>
+              <span v-show="!scope.row.show">********</span>
+              <span class="rt show-pwd" @click="passShow(scope.$index)">
             <svg-icon :icon-class="scope.row.show ? 'eye' : 'eye-open'" />
           </span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="注册时间">
-        <template slot-scope="scope">
-          <i class="el-icon-time" />
-          <span>{{ scope.row.create_time*1000 | formatdate('yyyy-MM-dd hh:mm:ss') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="最后登录时间">
-        <template slot-scope="scope">
-          <div v-if="scope.row.last_time">
-            <i class="el-icon-time" />
-            <span>{{ scope.row.last_time*1000 | formatdate('yyyy-MM-dd hh:mm:ss') }}</span>
-          </div>
-          <span v-else>/</span>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="激活状态">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.state === 1" type="success">已激活</el-tag>
-          <el-tag v-else-if="scope.row.state === 0 && scope.row.create_time + 1800 < now_data" type="danger">失效</el-tag>
-          <el-tag v-else type="warning">未激活</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="登录ip">
-        <template slot-scope="scope">
-          <span>{{ scope.row.ip }}</span>
-          <a v-if="scope.row.ip" class="rt" target="_blank" :href="'https://labs.ipip.net/location/ip?ip='+scope.row.ip"><svg-icon icon-class="map" /></a>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="激活状态" width="170">
-        <template slot-scope="scope">
-          <el-button size="mini" type="success" plain @click="change_user(scope.row)">修改</el-button>
-          <el-button size="mini" type="danger" plain @click="">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="注册时间">
+            <template slot-scope="scope">
+              <i class="el-icon-time" />
+              <span>{{ scope.row.create_time*1000 | formatdate('yyyy-MM-dd hh:mm:ss') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="最后登录时间">
+            <template slot-scope="scope">
+              <div v-if="scope.row.last_time">
+                <i class="el-icon-time" />
+                <span>{{ scope.row.last_time*1000 | formatdate('yyyy-MM-dd hh:mm:ss') }}</span>
+              </div>
+              <span v-else>/</span>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="激活状态">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.state === 1" type="success">已激活</el-tag>
+              <el-tag v-else-if="scope.row.state === 0 && scope.row.create_time + 1800 < now_data" type="danger">失效</el-tag>
+              <el-tag v-else type="warning">未激活</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="登录ip">
+            <template slot-scope="scope">
+              <span>{{ scope.row.ip }}</span>
+              <a v-if="scope.row.ip" class="rt" target="_blank" :href="'https://labs.ipip.net/location/ip?ip='+scope.row.ip"><svg-icon icon-class="map" /></a>
+            </template>
+          </el-table-column>
+          <el-table-column align="center" label="操作" width="170">
+            <template slot-scope="scope">
+              <el-button size="mini" type="success" plain @click="change_user(scope.row)">修改</el-button>
+              <el-button size="mini" type="danger" plain @click="">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
     <div class="wdui_center_pag">
-      <el-pagination
-        class="mt14"
-        background
-        :current-page.sync="table_page.currentPage"
-        :page-size.sync="table_page.pageSize"
-        :page-sizes="[1, 10, 20, 30, 40]"
-        layout="sizes ,prev, pager, next, jumper"
-        :total="table_page.total"
-        @current-change="fetchData"
-        @size-change="fetchData(1)"
-      />
-    </div>
+          <el-pagination
+            class="mt14"
+            background
+            :current-page.sync="table_page.currentPage"
+            :page-size.sync="table_page.pageSize"
+            :page-sizes="[1, 10, 20, 30, 40]"
+            layout="sizes ,prev, pager, next, jumper"
+            :total="table_page.total"
+            @current-change="fetchData"
+            @size-change="fetchData(1)"
+          />
+        </div>
     <change-user @get_list="fetchData(1)" :sendUser="sendUser" :is-show="showChange" @close="showChange = false"/>
   </div>
 </template>
@@ -121,20 +120,9 @@ export default {
             return import('./change')
         }
     },
-    filters: {
-        statusFilter(status) {
-            const statusMap = {
-                published: 'success',
-                draft: 'gray',
-                deleted: 'danger'
-            }
-            return statusMap[status]
-        }
-    },
     data() {
         return {
             list: null,
-            listLoading: true,
             now_data: Date.parse(new Date()) / 1000,
             // 查询条件
             checkState: null,
@@ -159,7 +147,6 @@ export default {
          * 表格获取
          */
         fetchData(page) {
-            this.listLoading = true
             userList({
                 page: page,
                 pageSize: this.table_page.pageSize,
@@ -169,10 +156,9 @@ export default {
                 last_stime: this.last_time[0] ? this.last_time[0] / 1000 : null,
                 last_etime: this.last_time[1] ? this.last_time[1] / 1000 : null
             }).then(response => {
-                this.list = response.data.list
-                this.listLoading = false
                 this.table_page.total = response.data.total
-                this.table_page.pages = response.data.pages
+                this.table_page.currentPage = response.data.pageNum
+                this.list = response.data.list
             })
         },
         /**
