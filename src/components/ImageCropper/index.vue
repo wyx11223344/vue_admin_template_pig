@@ -60,6 +60,12 @@
               <i class="vicp-icon6" @mousedown="startZoomAdd" @mouseout="endZoomAdd" @mouseup="endZoomAdd" />
             </div>
 
+            <div class="vicp-range">
+              <input v-model="fps" type="range" step="1" min="1" max="60">
+              <i class="vicp-icon5" @mousedown="startFpsSub"/>
+              <i class="vicp-icon6" @mousedown="startFpsAdd"/>
+            </div>
+
             <div v-if="!noRotate" class="vicp-rotate">
               <i @mousedown="startRotateLeft" @mouseout="endRotate" @mouseup="endRotate">↺</i>
               <i @mousedown="startRotateRight" @mouseout="endRotate" @mouseup="endRotate">↻</i>
@@ -261,19 +267,14 @@ export default {
                 naturalHeight: 0
             },
             img_list: [],
-            runTime: 40,
+            fps: 40,
             isGif: false
         }
     },
     computed: {
-        // 进度条样式
-        progressStyle() {
-            const {
-                progress
-            } = this
-            return {
-                width: progress + '%'
-            }
+        // 播放速度
+        runTime() {
+            return 1000 / this.fps
         },
         // 原图样式
         sourceImgStyle() {
@@ -726,6 +727,34 @@ export default {
         zoomChange(e) {
             this.zoomImg(e.target.value)
         },
+        // 按钮按下开始增加
+        startFpsAdd(e) {
+            const that = this
+            const {
+                fps
+            } = that
+            function zoom() {
+                that.fps = fps >= 60 ? 60 : ++that.fps
+                setTimeout(function() {
+                    zoom()
+                }, 60)
+            }
+            zoom()
+        },
+        // 按钮按下开始减少
+        startFpsSub(e) {
+            const that = this
+            const {
+                fps
+            } = that
+            function zoom() {
+                that.fps = fps <= 0 ? 0 : --that.fps
+                setTimeout(function() {
+                    zoom()
+                }, 60)
+            }
+            zoom()
+        },
         // 缩放原图
         zoomImg(newRange) {
             const that = this
@@ -834,7 +863,7 @@ export default {
                         if (i < this.img_list.length - 1) {
                             i++
                             run()
-                            gif.addFrame(document.getElementById('canvas_use'), { delay: 40, copy: true })
+                            gif.addFrame(document.getElementById('canvas_use'), { delay: this.runTime, copy: true })
                         } else {
                             gif.render()// 开始启动
                             gif.on('finished', function(blob) { // 最后生成一个blob对象
@@ -842,7 +871,7 @@ export default {
                                 _this.$emit('close1')
                             })
                         }
-                    }, 40)
+                    }, this.runTime)
                 }
                 run()
             } else {
@@ -952,6 +981,9 @@ export default {
       opacity: 1;
       -webkit-transform: scale(1) translatey(0);
       transform: scale(1) translatey(0); } }
+  .slider_class{
+
+  }
   .vue-image-crop-upload {
     position: fixed;
     display: block;
@@ -1142,7 +1174,7 @@ export default {
     float: right; }
   .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop .vicp-crop-left .vicp-range {
     position: relative;
-    margin: 30px 0 10px 0;
+    margin: 15px 0 10px 0;
     width: 240px;
     height: 18px; }
   .vue-image-crop-upload .vicp-wrap .vicp-step2 .vicp-crop .vicp-crop-left .vicp-range .vicp-icon5,
