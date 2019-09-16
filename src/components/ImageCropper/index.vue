@@ -799,6 +799,9 @@ export default {
                     }
                 } = that
                 const canvas = document.getElementById('canvas_use')
+                if (!canvas) {
+                    return
+                }
                 const ctx = canvas.getContext('2d')
                 if (e) {
                     // 取消鼠标按下移动状态

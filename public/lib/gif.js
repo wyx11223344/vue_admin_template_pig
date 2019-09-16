@@ -273,7 +273,7 @@
                 var defaults, frameDefaults
                 extend(GIF, superClass)
                 defaults = {
-                    workerScript: 'gif.worker.js',
+                    workerScript: 'lib/gif.worker.js',
                     workers: 2,
                     repeat: 0,
                     background: '#fff',
