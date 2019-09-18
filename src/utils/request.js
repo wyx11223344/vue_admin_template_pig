@@ -2,20 +2,8 @@ import axios from 'axios'
 import { Loading, Message } from 'element-ui'
 import store from '@/store'
 import qs from 'qs'
-import md5 from 'js-md5'
-import sha1 from 'sha1'
-
+import getSign from '@/utils/sign'
 let loadingInstance
-function _getRandomString(len) {
-    len = len || 32
-    const $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678' // 默认去掉了容易混淆的字符oOLl,9gq,Vv,Uu,I1
-    const maxPos = $chars.length
-    let pwd = ''
-    for (let i = 0; i < len; i++) {
-        pwd += $chars.charAt(Math.floor(Math.random() * maxPos))
-    }
-    return pwd
-}
 
 // create an axios instance
 const service = axios.create({
@@ -36,18 +24,13 @@ service.interceptors.request.use(
         //   config.headers['X-Token'] = getToken()
         // }
         // 加密添加请求头
-        const timestamp = parseInt(Date.parse(new Date()) / 1000)
-        const rand_str = _getRandomString(10)
-        const arr = `${timestamp + rand_str}LOVESHEN`
-        const sha = sha1(arr)
-        const token = md5(sha)
-        const signature = token.toUpperCase()
         if (!config.data) {
             config.data = {}
         }
-        config.data.timestamp = timestamp
-        config.data.rand = rand_str
-        config.data.signature = signature
+        const arr = getSign()
+        config.data.timestamp = arr[0]
+        config.data.rand = arr[1]
+        config.data.signature = arr[2]
         if (config.method === 'post') {
             config.data = qs.stringify(config.data) // post请求格式化数据
         }
@@ -79,9 +62,9 @@ service.interceptors.response.use(
    */
     response => {
         const res = response.data
-        store.commit("changeLoadingArr", store.getters.loadingArr - 1) // 动画加载个数减1
-        if(store.getters.loadingArr === 0){
-          loadingInstance.close()
+        store.commit('changeLoadingArr', store.getters.loadingArr - 1) // 动画加载个数减1
+        if (store.getters.loadingArr === 0) {
+            loadingInstance.close()
         }
         // if the custom code is not 20000, it is judged as an error.
         if (res.code !== 200) {
@@ -119,9 +102,9 @@ service.interceptors.response.use(
         }
     },
     err => {
-        store.commit("changeLoadingArr", store.getters.loadingArr - 1) // 动画加载个数减1
-        if(store.getters.loadingArr === 0){
-          loadingInstance.close()
+        store.commit('changeLoadingArr', store.getters.loadingArr - 1) // 动画加载个数减1
+        if (store.getters.loadingArr === 0) {
+            loadingInstance.close()
         }
         Message({
             message: err.message,

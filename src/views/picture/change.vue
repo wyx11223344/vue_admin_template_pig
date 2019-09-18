@@ -24,17 +24,17 @@
         //          :on-success="uplode_success"
         //          :before-upload="beforeAvatarUpload")
         el-image.show-place(v-if="imageUrl" :src="newImage ? newImage : imageUrl" class="avatar" @click="imagecropperShow = true")
+          div(slot="error" class="image-slot" @click="imagecropperShow = true")
+            i(class="el-icon-picture-outline")
         p.change-text ↑点上面修改图片
         image-cropper(v-if="imagecropperShow"
                       key="file"
                       :width="300"
                       :height="300"
-                      url="/webChange/pic_change"
                       lang-type="en"
                       :params="form"
                       @close1="close1"
-                      @fileSend="imgChange"
-                      @crop-upload-success="uplode_success")
+                      @fileSend="imgChange(arguments)")
       el-form-item(label="图片类型:" v-if="form.type")
         .big-show-font {{form.type | picTypeFilter}}
       el-form-item(label="图片名称:" v-if="form.pic_url")
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-
+import { picChange } from '@/api/picList'
 export default {
     name: 'PictureChange',
     filters: {
@@ -95,7 +95,9 @@ export default {
             // 上传加载
             fullscreenLoading: false,
             imagecropperShow: false,
-            newImage: ''
+            newImage: '',
+            newFile: null,
+            FileName: ''
         }
     },
     computed: {
@@ -141,8 +143,36 @@ export default {
         submitForm(formName) {
             this.$refs[formName].validate((valid) => {
                 if (valid) {
+                    if (!this.newFile) {
+                        this.$message.error('请上传需要修改的图片')
+                        return
+                    }
                     this.form.new_url = this.picName
-                    this.$refs.upload.submit()
+                    const fmData = new FormData()
+                    fmData.append('file', this.newFile, this.FileName)
+                    Object.keys(this.form).forEach((k) => {
+                        fmData.append(k, this.form[k])
+                    })
+                    // this.form.file = this.newFile
+                    this.fullscreenLoading = true
+                    picChange(fmData).then((response) => {
+                        this.fullscreenLoading = false
+                        if (response.data.code === 200) {
+                            this.$message({
+                                type: 'success',
+                                message: '修改成功'
+                            })
+                            this.newImage = null
+                            this.newFile = null
+                            this.FileName = null
+                            this.$emit('list_get')
+                            this.$emit('changeDia', false)
+                        } else {
+                            this.$message.error('修改失败，请再次尝试')
+                        }
+                    }).catch(() => {
+                        this.fullscreenLoading = false
+                    })
                 } else {
                     this.$message.error('表单信息有错误，请根据提示填写表单信息')
                     return false
@@ -157,48 +187,51 @@ export default {
             this.form = JSON.parse(JSON.stringify(this.sendPic))
         },
 
-        /**
-         * 上传前处理
-         * @param file
-         * @returns {boolean}
-         */
-        beforeAvatarUpload(file) {
-            const isJPG = file.type === 'image/jpeg'
-            const isPNG = file.type === 'image/png'
-            const isGIF = file.type === 'image/gif'
-            const isLt2M = file.size / 1024 / 1024 < 2
-            if (!isJPG && !isPNG && !isGIF) {
-                this.$message.error('上传图片只能是 JPG 和 PNG 格式!')
-                return false
-            }
-            if (!isLt2M) {
-                this.$message.error('上传图片大小不能超过 2MB!')
-                return false
-            }
-            this.fullscreenLoading = true
-            return true
-        },
+        // /**
+        //  * 上传前处理
+        //  * @param file
+        //  * @returns {boolean}
+        //  */
+        // beforeAvatarUpload(file) {
+        //     const isJPG = file.type === 'image/jpeg'
+        //     const isPNG = file.type === 'image/png'
+        //     const isGIF = file.type === 'image/gif'
+        //     const isLt2M = file.size / 1024 / 1024 < 2
+        //     if (!isJPG && !isPNG && !isGIF) {
+        //         this.$message.error('上传图片只能是 JPG 和 PNG 格式!')
+        //         return false
+        //     }
+        //     if (!isLt2M) {
+        //         this.$message.error('上传图片大小不能超过 2MB!')
+        //         return false
+        //     }
+        //     this.fullscreenLoading = true
+        //     return true
+        // },
 
-        uplode_success(response) {
-            if (response.code === 200) {
-                this.$message({
-                    type: 'success',
-                    message: '修改成功'
-                })
-                this.$emit('list_get')
-                this.$emit('changeDia', false)
-            } else {
-                this.$message.error('修改失败，请再次尝试')
-            }
-            this.fullscreenLoading = false
-        },
+        // uplode_success(response) {
+        //     if (response.code === 200) {
+        //         this.$message({
+        //             type: 'success',
+        //             message: '修改成功'
+        //         })
+        //         this.$emit('list_get')
+        //         this.$emit('changeDia', false)
+        //     } else {
+        //         this.$message.error('修改失败，请再次尝试')
+        //     }
+        //     this.fullscreenLoading = false
+        // },
 
         close1() {
             this.imagecropperShow = false
         },
 
-        imgChange(file) {
-            this.newImage = file
+        imgChange(bolb) {
+            console.log(bolb)
+            this.newImage = bolb[0].toString()
+            this.newFile = bolb[1]
+            this.FileName = bolb[2]
         }
     }
 }

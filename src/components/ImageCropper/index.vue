@@ -60,10 +60,10 @@
               <i class="vicp-icon6" @mousedown="startZoomAdd" @mouseout="endZoomAdd" @mouseup="endZoomAdd" />
             </div>
 
-            <div class="vicp-range">
+            <div v-if="isGif" class="vicp-range">
               <input v-model="fps" type="range" step="1" min="1" max="60">
-              <i class="vicp-icon5" @mousedown="startFpsSub"/>
-              <i class="vicp-icon6" @mousedown="startFpsAdd"/>
+              <i class="vicp-icon5" @mousedown="startFpsSub" @mouseup="endFpsSub" @mouseout="endFpsSub" />
+              <i class="vicp-icon6" @mousedown="startFpsAdd" @mouseup="endFpsAdd" @mouseout="endFpsAdd" />
             </div>
 
             <div v-if="!noRotate" class="vicp-rotate">
@@ -89,6 +89,7 @@
           <a class="vicp-operate-btn" @click="prepareUpload" @mousedown="ripple">{{ lang.btn.save }}</a>
         </div>
       </div>
+
       <canvas v-show="false" id="canvas_use" ref="canvas" :width="width" :height="height" />
     </div>
   </div>
@@ -158,7 +159,7 @@ export default {
         // 单文件大小限制
         maxSize: {
             type: Number,
-            'default': 10240
+            'default': 20480
         },
         // 语言类型
         langType: {
@@ -207,6 +208,8 @@ export default {
             isSupported = false
         }
         return {
+            // 上传文件
+            files: null,
             // 图片的mime
             mime,
             // 语言包
@@ -249,6 +252,8 @@ export default {
             },
             // 原图展示属性
             scale: {
+                zoomFpsDown: false, // gif显示速度
+                zoomFpsOn: false, // gif显示速度
                 zoomAddOn: false, // 按钮缩放事件开启
                 zoomSubOn: false, // 按钮缩放事件开启
                 range: 1, // 最大100
@@ -267,7 +272,8 @@ export default {
                 naturalHeight: 0
             },
             img_list: [],
-            fps: 40,
+            // gif 默认显示速度
+            fps: 25,
             isGif: false
         }
     },
@@ -423,6 +429,7 @@ export default {
             e.preventDefault()
             if (this.loading !== 1) {
                 const files = e.target.files || e.dataTransfer.files
+                this.files = files
                 this.reset()
                 if (this.checkFile(files[0])) {
                     if (files[0].type === 'image/gif') {
@@ -440,7 +447,6 @@ export default {
             return canvas.toDataURL('image/png', 1)
         },
         pre_load_gif(gif_source) {
-            var img_list = []
             const gifImg = document.createElement('img')
             // gif库需要img标签配置下面两个属性
             gifImg.setAttribute('rel:animated_src', URL.createObjectURL(gif_source))
@@ -449,7 +455,7 @@ export default {
             // 新建gif实例
             var rub = new SuperGif({ gif: gifImg })
             rub.load(() => {
-                var img_list = []
+                const img_list = []
                 for (let i = 1; i <= rub.get_length(); i++) {
                     // 遍历gif实例的每一帧
                     rub.move_to(i)
@@ -464,11 +470,14 @@ export default {
                     this.sourceImgUrl = this.img_list[i]
                     this.startCrop()
                     const a = () => {
-                        setTimeout(() => {
-                            i = i < this.img_list.length - 1 ? i + 1 : 0
-                            this.sourceImgUrl = this.img_list[i]
-                            this.sourceImg.src = this.img_list[i]
-                            this.createImg().then(() => {
+                        setTimeout(async() => {
+                            await new Promise((resolve) => {
+                                i = i < this.img_list.length - 1 ? i + 1 : 0
+                                this.sourceImgUrl = this.img_list[i]
+                                this.sourceImg.src = this.img_list[i]
+                                resolve()
+                            })
+                            await this.createImg().then(() => {
                                 a()
                             })
                         }, this.runTime)
@@ -544,6 +553,7 @@ export default {
                 if (nWidth < width || nHeight < height) {
                     that.hasError = true
                     that.errorMsg = lang.error.lowestPx + width + '*' + height
+                    that.setStep(1)
                     return false
                 }
                 if (ratio > nRatio) {
@@ -727,17 +737,32 @@ export default {
         zoomChange(e) {
             this.zoomImg(e.target.value)
         },
+        endFpsSub() {
+            const {
+                scale
+            } = this
+            scale.zoomFpsDown = false
+        },
+        endFpsAdd() {
+            const {
+                scale
+            } = this
+            scale.zoomFpsOn = false
+        },
         // 按钮按下开始增加
         startFpsAdd(e) {
             const that = this
             const {
-                fps
+                scale
             } = that
+            scale.zoomFpsOn = true
             function zoom() {
-                that.fps = fps >= 60 ? 60 : ++that.fps
-                setTimeout(function() {
-                    zoom()
-                }, 60)
+                if (scale.zoomFpsOn) {
+                    that.fps = that.fps >= 60 ? 60 : ++that.fps
+                    setTimeout(function() {
+                        zoom()
+                    }, 60)
+                }
             }
             zoom()
         },
@@ -745,13 +770,16 @@ export default {
         startFpsSub(e) {
             const that = this
             const {
-                fps
+                scale
             } = that
+            scale.zoomFpsDown = true
             function zoom() {
-                that.fps = fps <= 0 ? 0 : --that.fps
-                setTimeout(function() {
-                    zoom()
-                }, 60)
+                if (scale.zoomFpsDown) {
+                    that.fps = that.fps <= 1 ? 1 : --that.fps
+                    setTimeout(function() {
+                        zoom()
+                    }, 60)
+                }
             }
             zoom()
         },
@@ -863,11 +891,15 @@ export default {
                         if (i < this.img_list.length - 1) {
                             i++
                             run()
-                            gif.addFrame(document.getElementById('canvas_use'), { delay: this.runTime, copy: true })
+                            gif.addFrame(document.getElementById('canvas_use'), { delay: this.runTime * 4 / 3, copy: true })
                         } else {
                             gif.render()// 开始启动
                             gif.on('finished', function(blob) { // 最后生成一个blob对象
-                                _this.$emit('fileSend', URL.createObjectURL(blob))
+                                _this.$emit('fileSend', URL.createObjectURL(blob), new window.File(
+                                    [blob],
+                                    _this.files[0].name,
+                                    { type: _this.files[0].type }
+                                ))
                                 _this.$emit('close1')
                             })
                         }
@@ -879,15 +911,12 @@ export default {
                     url,
                     createImgUrl,
                     field,
-                    ki
+                    ki,
+                    mime,
+                    imgFormat
                 } = this
-                this.$emit('crop-success', createImgUrl, field, ki)
-                if (typeof url === 'string' && url) {
-                    this.$emit('fileSend', this.createImgUrl)
-                    this.$emit('close1')
-                } else {
-                    this.off()
-                }
+                this.$emit('fileSend', this.createImgUrl, data2blob(createImgUrl, mime), field + '.' + imgFormat)
+                this.$emit('close1')
             }
         },
         // 上传图片
