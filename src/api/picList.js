@@ -28,7 +28,7 @@ export function picChange(params) {
     params.append('rand', arr[1])
     params.append('signature', arr[2])
     params.append('noLog', true)
-    return axios.post('http://localhost:8068/webChange/pic_change',
+    return axios.post(`${process.env.VUE_APP_BASE_API}/webChange/pic_change`,
         params
     )
 }
