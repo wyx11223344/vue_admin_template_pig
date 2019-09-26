@@ -28,7 +28,7 @@
                       @fileSend="imgChange(arguments)")
       el-form-item(label="图片类型:")
         .big-show-font(v-if="form.type" v-show="!addNew") {{form.type | picTypeFilter}}
-        el-select(v-model="typeSelect")
+        el-select(v-model="typeSelect" v-show="addNew")
           el-option(label="类型图片" value="/typeList/")
           el-option(label="用户图片" value="user")
           el-option(label="测试图片" value="/new/")
