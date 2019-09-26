@@ -32,3 +32,11 @@ export function picChange(params) {
         params
     )
 }
+
+export function typePicDel(params) {
+    return request({
+        url: '/webChange/pic_change',
+        method: 'POST',
+        params
+    })
+}

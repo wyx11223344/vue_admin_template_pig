@@ -14,6 +14,9 @@ import router from './router'
 import * as filters from './utils/filters'
 import echarts from 'echarts' // 引入echarts
 import directive from './directive/waves/index'
+// 组件加入
+import specialUi from '@wyx962717593/special-ui'
+import '@wyx962717593/special-ui/dist/special-ui.css'
 
 import '@/icons' // icon
 import '@/permission' // permission control
@@ -32,7 +35,8 @@ Object.keys(filters).forEach((key) => {
  * import { mockXHR } from '../mock'
  * mockXHR()
  */
-
+// 个人组件注册
+Vue.use(specialUi)// 全部注册
 // set ElementUI lang to EN
 Vue.use(directive)
 Vue.use(ElementUI)

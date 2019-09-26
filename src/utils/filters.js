@@ -76,3 +76,24 @@ export function filterBy(array, key, value) {
     })
     return result
 }
+
+/**
+ * @description: 过滤图片类型
+ * @param index
+ * @returns {void | string|string}
+ */
+export function picTypeFilter(index) {
+    const reg = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/
+    index = index.replace(/\//g, '')
+    if (reg.test(index)) {
+        return `用户${index}`
+    }
+    switch (index) {
+        case 'typeList':
+            return '类型图片'
+        case 'new':
+            return '测试图片'
+        default:
+            return index
+    }
+}

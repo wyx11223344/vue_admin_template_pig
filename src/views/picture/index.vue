@@ -20,10 +20,11 @@
       <el-button type="success" size="mini" @click="reset()">重置</el-button>
     </div>
     <div class="head-control">
-      <el-button v-waves type="primary" size="mini" @click="add_pic()">添加图片
+      <el-button v-waves class="lf" type="primary" size="mini" @click="add_pic()">添加图片
         <i class="el-icon-picture el-icon--right" />
       </el-button>
-      <el-button v-waves class="rt" type="danger" size="mini" @click="show_del()">
+      <div v-shakes:[shakes]="sendObject" class="ml20 top_tip lf">回收站的图片删除7天后自动删除，请注意时间</div>
+      <el-button v-waves class="rt" type="danger" size="mini" @click="del_change()">
         <i class="el-icon-delete-solid" />
       </el-button>
     </div>
@@ -70,10 +71,15 @@
           <el-tag v-else type="danger">未使用</el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="210">
+      <el-table-column v-if="!isDel" align="center" label="操作" width="210">
         <template slot-scope="scope">
           <el-button size="mini" type="success" plain @click="change_pic(scope.row)">修改</el-button>
-          <el-button size="mini" type="danger" plain @click="">删除</el-button>
+          <el-button size="mini" type="danger" plain @click="del_pic(scope.row,true)">删除</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="isDel" align="center" label="操作" width="210">
+        <template slot-scope="scope">
+          <el-button size="mini" type="warning" plain @click="del_pic(scope.row,false)">恢复</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -90,35 +96,18 @@
         @size-change="fetchData(1)"
       />
     </div>
-    <picture-change v-model="isShowChange" :send-pic="sendPic" @list_get="fetchData(table_page.currentPage)"/>
+    <picture-change v-model="isShowChange" :add-new="isAdd" :send-pic="sendPic" @list_get="fetchData(table_page.currentPage)" />
   </div>
 </template>
 
 <script>
-import { typePicType, typePicList } from '@/api/picList'
+import { typePicType, typePicList, typePicDel } from '@/api/picList'
 
 export default {
     name: 'PictureIndex',
     components: {
         pictureChange: () => {
             return import('./change')
-        }
-    },
-    filters: {
-        picTypeFilter(index) {
-            const reg = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/
-            index = index.replace(/\//g, '')
-            if (reg.test(index)) {
-                return `用户${index}`
-            }
-            switch (index) {
-                case 'typeList':
-                    return '类型图片'
-                case 'new':
-                    return '测试图片'
-                default:
-                    return index
-            }
         }
     },
     data() {
@@ -138,13 +127,23 @@ export default {
             },
             // 修改弹窗
             isShowChange: false,
-            sendPic: {}
+            sendPic: {},
+            // 判断是否新增
+            isAdd: false,
+            // 判断是否查看回收站
+            isDel: false,
+            // 提示动画
+            shakes: 1,
+            sendObject: {
+                class: 'rubberBand'
+            }
         }
     },
     mounted() {
         this.fetchData(1)
         this.selectGet()
         this.checkGet()
+        this.shakesRun()
     },
     methods: {
 
@@ -180,7 +179,8 @@ export default {
                 pageSize: this.table_page.pageSize,
                 type: this.picType ? this.picType : null,
                 create_itime: this.createTime[0] ? this.createTime[0] / 1000 : null,
-                create_etime: this.createTime[1] ? this.createTime[0] / 1000 : null
+                create_etime: this.createTime[1] ? this.createTime[0] / 1000 : null,
+                isDel: this.isDel
             }).then(response => {
                 this.table_page.total = response.data.total
                 this.table_page.currentPage = response.data.pageNum
@@ -193,12 +193,74 @@ export default {
         reset() {
             this.picType = null
             this.createTime = []
+            this.isDel = false
             this.fetchData(1)
         },
 
+        /**
+         * 修改弹窗打开
+         * @param index
+         */
         change_pic(index) {
             this.sendPic = index
+            this.isAdd = false
             this.isShowChange = true
+        },
+
+        /**
+         * 新增弹窗打开
+         */
+        add_pic() {
+            this.sendPic = {}
+            this.isAdd = true
+            this.isShowChange = true
+        },
+
+        /**
+         * 列表类型切换
+         */
+        del_change() {
+            this.isDel = !this.isDel
+            this.fetchData(1)
+        },
+
+        /**
+         * shakes动画循环触发
+         */
+        shakesRun() {
+            setTimeout(() => {
+                this.shakes += 1
+                this.shakesRun()
+            }, 5000)
+        },
+
+        del_pic(index, del) {
+            this.$confirm('您即将修改该图片, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                const param = {
+                    id: index.id,
+                    del: del
+                }
+                typePicDel(param).then((response) => {
+                    if (response.code === 200) {
+                        this.$message({
+                            type: 'success',
+                            message: '修改成功'
+                        })
+                        this.fetchData(this.table_page.currentPage)
+                    } else {
+                        this.$message.error('修改失败请检查网络后重试')
+                    }
+                })
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消修改'
+                });
+            });
         }
     }
 }
@@ -225,7 +287,19 @@ export default {
   }
   .head-control {
     display: inline-block;
+    position: relative;
     height: 40px;
     width: 100%;
+  }
+  .top_tip{
+    position: absolute;
+    margin: auto;
+    color: #ff7476;
+    left: 0;
+    right: 0;
+    top: 0;
+    width: 330px;
+    height: 29px;
+    line-height: 29px;
   }
 </style>

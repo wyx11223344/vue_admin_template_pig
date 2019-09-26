@@ -5,7 +5,7 @@
 */
 <template lang="pug">
   el-dialog(:before-close="close"
-            title="修改图片信息"
+            :title="addNew ? '新增图片' : '修改图片信息'"
             append-to-body
             :visible.sync="isShow"
             width="50%"
@@ -14,19 +14,10 @@
             element-loading-background="rgba(255,255,255,0.8)")
     el-form(ref="picForm" :rules="rules" :model="form" label-width="80px" :status-icon="true")
       el-form-item(label="图片:")
-        //el-upload(action="http://localhost:8068/webChange/pic_change"
-        //          ref="upload"
-        //          :multiple="false"
-        //          :show-file-list="false"
-        //          :data="form"
-        //          :on-change="fileChange"
-        //          :auto-upload="false"
-        //          :on-success="uplode_success"
-        //          :before-upload="beforeAvatarUpload")
-        el-image.show-place(v-if="imageUrl" :src="newImage ? newImage : imageUrl" class="avatar" @click="imagecropperShow = true")
-          div(slot="error" class="image-slot" @click="imagecropperShow = true")
-            i(class="el-icon-picture-outline")
-        p.change-text ↑点上面修改图片
+        el-image.show-place(v-if="imageUrl" :src="newImage ? newImage : imageUrl" class="avatar" @click="showDia()")
+          div.show-place.image-slot(slot="error" @click="showDia()")
+            i.el-icon-picture-outline
+        p.change-text {{addNew ? '↑点上面上传图片' : '↑点上面修改图片'}}
         image-cropper(v-if="imagecropperShow"
                       key="file"
                       :width="300"
@@ -35,12 +26,18 @@
                       :params="form"
                       @close1="close1"
                       @fileSend="imgChange(arguments)")
-      el-form-item(label="图片类型:" v-if="form.type")
-        .big-show-font {{form.type | picTypeFilter}}
-      el-form-item(label="图片名称:" v-if="form.pic_url")
-        el-input(v-model="picName")
+      el-form-item(label="图片类型:")
+        .big-show-font(v-if="form.type" v-show="!addNew") {{form.type | picTypeFilter}}
+        el-select(v-model="typeSelect")
+          el-option(label="类型图片" value="/typeList/")
+          el-option(label="用户图片" value="user")
+          el-option(label="测试图片" value="/new/")
+      el-form-item(label="用户邮箱:" v-show="typeSelect === 'user'")
+        el-input(v-model="userName" placeholder="请输入用户邮箱地址")
+      el-form-item(label="图片名称:")
+        el-input(v-model="picName" placeholder="请输入上传图片名称")
       el-form-item
-        el-button(size="mini" type="primary" @click="submitForm('picForm')") 修改
+        el-button(size="mini" type="primary" @click="submitForm('picForm')") {{addNew ? '新增' : '修改'}}
         el-button(size="mini" @click="resetForm()") 重置
 </template>
 
@@ -48,23 +45,6 @@
 import { picChange } from '@/api/picList'
 export default {
     name: 'PictureChange',
-    filters: {
-        picTypeFilter(index) {
-            const reg = /^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/
-            index = index.replace(/\//g, '')
-            if (reg.test(index)) {
-                return `用户${index}`
-            }
-            switch (index) {
-                case 'typeList':
-                    return '类型图片'
-                case 'new':
-                    return '测试图片'
-                default:
-                    return index
-            }
-        }
-    },
     components: {
         ImageCropper: () => {
             return import('@/components/ImageCropper/index')
@@ -80,24 +60,30 @@ export default {
         },
         sendPic: {
             type: Object
+        },
+        addNew: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
         return {
             dialogVisible: false,
+            // 接收form表单
             form: {},
-            rules: {
-                state: [
-                    { required: true, message: '请选择活动区域', trigger: 'change' }
-                ]
-            },
+            rules: {},
+            // 图片名称
             picName: '',
             // 上传加载
             fullscreenLoading: false,
             imagecropperShow: false,
+            // 回调图片
             newImage: '',
             newFile: null,
-            FileName: ''
+            FileName: '',
+            // 类型绑定值
+            typeSelect: '',
+            userName: ''
         }
     },
     computed: {
@@ -121,9 +107,7 @@ export default {
         isShow: {
             handler() {
                 if (this.isShow) {
-                    this.form = JSON.parse(JSON.stringify(this.sendPic))
-                    this.picName = this.getName(this.form.pic_url)
-                    this.newImage = ''
+                    this.reset()
                 }
             },
             immediate: true
@@ -141,11 +125,31 @@ export default {
              * @param formName
              */
         submitForm(formName) {
+            const reg = /^\s*$/g
             this.$refs[formName].validate((valid) => {
                 if (valid) {
                     if (!this.newFile) {
                         this.$message.error('请上传需要修改的图片')
                         return
+                    }
+                    if (reg.test(this.picName)) {
+                        this.$message.error('请输入上传图片名称')
+                        return false
+                    }
+                    if (this.addNew) {
+                        if (reg.test(this.typeSelect)) {
+                            this.$message.error('请选择图片类型')
+                            return false
+                        }
+                        if (this.typeSelect === 'user') {
+                            if (reg.test(this.userName)) {
+                                this.$message.error('请输入用户名称')
+                                return false
+                            }
+                            this.form.type = `/${this.userName}/`
+                        } else {
+                            this.form.type = this.typeSelect
+                        }
                     }
                     this.form.new_url = this.picName
                     const fmData = new FormData()
@@ -160,7 +164,7 @@ export default {
                         if (response.data.code === 200) {
                             this.$message({
                                 type: 'success',
-                                message: '修改成功'
+                                message: this.addNew ? '新增成功' : '修改成功'
                             })
                             this.newImage = null
                             this.newFile = null
@@ -168,7 +172,7 @@ export default {
                             this.$emit('list_get')
                             this.$emit('changeDia', false)
                         } else {
-                            this.$message.error('修改失败，请再次尝试')
+                            this.$message.error(this.addNew ? '新增失败，请再次尝试' : '修改失败，请再次尝试')
                         }
                     }).catch(() => {
                         this.fullscreenLoading = false
@@ -187,51 +191,43 @@ export default {
             this.form = JSON.parse(JSON.stringify(this.sendPic))
         },
 
-        // /**
-        //  * 上传前处理
-        //  * @param file
-        //  * @returns {boolean}
-        //  */
-        // beforeAvatarUpload(file) {
-        //     const isJPG = file.type === 'image/jpeg'
-        //     const isPNG = file.type === 'image/png'
-        //     const isGIF = file.type === 'image/gif'
-        //     const isLt2M = file.size / 1024 / 1024 < 2
-        //     if (!isJPG && !isPNG && !isGIF) {
-        //         this.$message.error('上传图片只能是 JPG 和 PNG 格式!')
-        //         return false
-        //     }
-        //     if (!isLt2M) {
-        //         this.$message.error('上传图片大小不能超过 2MB!')
-        //         return false
-        //     }
-        //     this.fullscreenLoading = true
-        //     return true
-        // },
-
-        // uplode_success(response) {
-        //     if (response.code === 200) {
-        //         this.$message({
-        //             type: 'success',
-        //             message: '修改成功'
-        //         })
-        //         this.$emit('list_get')
-        //         this.$emit('changeDia', false)
-        //     } else {
-        //         this.$message.error('修改失败，请再次尝试')
-        //     }
-        //     this.fullscreenLoading = false
-        // },
-
+        /**
+         * 关闭回调
+         */
         close1() {
             this.imagecropperShow = false
         },
 
+        /**
+         * 图片处理回调
+         * @param bolb
+         */
         imgChange(bolb) {
             console.log(bolb)
             this.newImage = bolb[0].toString()
             this.newFile = bolb[1]
             this.FileName = bolb[2]
+        },
+
+        /**
+         * 上传弹窗显示
+         */
+        showDia() {
+            this.imagecropperShow = true
+        },
+
+        /**
+         * 组件重置
+         */
+        reset() {
+            this.form = JSON.parse(JSON.stringify(this.sendPic))
+            if (!this.addNew) {
+                this.picName = this.getName(this.form.pic_url)
+            }
+            this.picName = ''
+            this.newImage = ''
+            this.typeSelect = ''
+            this.userName = ''
         }
     }
 }
