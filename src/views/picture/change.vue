@@ -20,8 +20,8 @@
         p.change-text {{addNew ? '↑点上面上传图片' : '↑点上面修改图片'}}
         image-cropper(v-if="imagecropperShow"
                       key="file"
-                      :width="300"
-                      :height="300"
+                      :width="200"
+                      :height="200"
                       lang-type="en"
                       :params="form"
                       @close1="close1"
@@ -188,7 +188,7 @@ export default {
              * 表单重置
              */
         resetForm() {
-            this.form = JSON.parse(JSON.stringify(this.sendPic))
+            this.reset()
         },
 
         /**
@@ -223,8 +223,9 @@ export default {
             this.form = JSON.parse(JSON.stringify(this.sendPic))
             if (!this.addNew) {
                 this.picName = this.getName(this.form.pic_url)
+            } else {
+                this.picName = ''
             }
-            this.picName = ''
             this.newImage = ''
             this.typeSelect = ''
             this.userName = ''

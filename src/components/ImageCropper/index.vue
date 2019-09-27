@@ -1,5 +1,10 @@
 <template>
-  <div v-show="value" class="vue-image-crop-upload">
+  <div
+       v-show="value"
+       class="vue-image-crop-upload"
+       v-loading.fullscreen.lock="fullscreenLoading"
+       element-loading-text="正在处理图片中请骚等"
+       element-loading-background="rgba(255, 255, 255, 0.8)">
     <div class="vicp-wrap">
       <div class="vicp-close" @click="off">
         <i class="vicp-icon4" />
@@ -208,6 +213,8 @@ export default {
             isSupported = false
         }
         return {
+            // 加载
+            fullscreenLoading: false,
             // 上传文件
             files: null,
             // 图片的mime
@@ -426,6 +433,7 @@ export default {
             }
         },
         handleChange(e) {
+            this.fullscreenLoading = true
             e.preventDefault()
             if (this.loading !== 1) {
                 const files = e.target.files || e.dataTransfer.files
@@ -553,6 +561,7 @@ export default {
                 if (nWidth < width || nHeight < height) {
                     that.hasError = true
                     that.errorMsg = lang.error.lowestPx + width + '*' + height
+                    that.fullscreenLoading = false
                     that.setStep(1)
                     return false
                 }
@@ -578,6 +587,7 @@ export default {
                 scale.naturalHeight = nHeight
                 that.sourceImg = img
                 that.createImg()
+                that.fullscreenLoading = false
                 that.setStep(2)
                 img.onload = function() {}
             }
@@ -879,6 +889,7 @@ export default {
             })
         },
         prepareUpload() {
+            this.fullscreenLoading = true
             const _this = this
             if (this.isGif) {
                 var gif = new GIF({
@@ -900,6 +911,7 @@ export default {
                                     _this.files[0].name,
                                     { type: _this.files[0].type }
                                 ))
+                                this.fullscreenLoading = false
                                 _this.$emit('close1')
                             })
                         }
@@ -916,6 +928,7 @@ export default {
                     imgFormat
                 } = this
                 this.$emit('fileSend', this.createImgUrl, data2blob(createImgUrl, mime), field + '.' + imgFormat)
+                this.fullscreenLoading = false
                 this.$emit('close1')
             }
         },
