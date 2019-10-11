@@ -203,7 +203,6 @@ export default {
          * @param bolb
          */
         imgChange(bolb) {
-            console.log(bolb)
             this.newImage = bolb[0].toString()
             this.newFile = bolb[1]
             this.FileName = bolb[2]
