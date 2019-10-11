@@ -5,16 +5,16 @@
  * @Last Modified by:
  * @Last Modified time:
  */
-'use strict';
+'use strict'
 const stateStore = {
     state: {
-        loadingArr: 0, // 关于加载动画几时结束
+        loadingArr: 0 // 关于加载动画几时结束
     },
     mutations: {
         changeLoadingArr: (state, token) => { // 这里的state对象对应上面的state
-            state.loadingArr = token;
+            state.loadingArr = token
         }
     }
-};
+}
 
-export default stateStore;
+export default stateStore

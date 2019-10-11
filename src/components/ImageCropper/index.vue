@@ -1,10 +1,11 @@
 <template>
   <div
-       v-show="value"
-       class="vue-image-crop-upload"
-       v-loading.fullscreen.lock="fullscreenLoading"
-       element-loading-text="正在处理图片中请骚等"
-       element-loading-background="rgba(255, 255, 255, 0.8)">
+    v-show="value"
+    v-loading.fullscreen.lock="fullscreenLoading"
+    class="vue-image-crop-upload"
+    element-loading-text="正在处理图片中请骚等"
+    element-loading-background="rgba(255, 255, 255, 0.8)"
+  >
     <div class="vicp-wrap">
       <div class="vicp-close" @click="off">
         <i class="vicp-icon4" />

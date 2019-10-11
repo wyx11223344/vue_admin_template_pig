@@ -3,7 +3,7 @@
     <div class="choose_bulk">
       <span>图片类型：</span>
       <el-select v-model="picType" clearable size="mini" class="select_change" placeholder="选择图片类型" @change="fetchData(1)">
-        <el-option v-for="item in selectList" :key="item" :value="item" :label="item | picTypeFilter" />
+        <el-option v-for="item in selectList" :key="item" :value="item" :label="item | picTypeFilter"></el-option>
       </el-select>
       <span>创建时间：</span>
       <el-date-picker
@@ -15,8 +15,8 @@
         end-placeholder="结束日期"
         size="mini"
         value-format="timestamp"
-        @change="fetchData(1)"
-      />
+        @change="fetchData(1)">
+      </el-date-picker>
       <el-button type="success" size="mini" @click="reset()">重置</el-button>
     </div>
     <div class="head-control">
@@ -93,8 +93,8 @@
         layout="sizes ,prev, pager, next, jumper"
         :total="table_page.total"
         @current-change="fetchData"
-        @size-change="fetchData(1)"
-      />
+        @size-change="fetchData(1)">
+      </el-pagination>
     </div>
     <picture-change v-model="isShowChange" :add-new="isAdd" :send-pic="sendPic" @list_get="fetchData(table_page.currentPage)" />
   </div>
@@ -259,8 +259,8 @@ export default {
                 this.$message({
                     type: 'info',
                     message: '已取消修改'
-                });
-            });
+                })
+            })
         }
     }
 }

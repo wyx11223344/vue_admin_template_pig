@@ -27,14 +27,7 @@ import '@/permission' // permission control
 Object.keys(filters).forEach((key) => {
     Vue.filter(key, filters[ key ])
 })
-/**
- * If you don't want to use mock-server
- * you want to use mockjs for request interception
- * you can execute:
- *
- * import { mockXHR } from '../mock'
- * mockXHR()
- */
+
 // 个人组件注册
 Vue.use(specialUi)// 全部注册
 // set ElementUI lang to EN

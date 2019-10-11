@@ -30,7 +30,7 @@ export default {
     name: 'TypeListCardEachCard',
     props: {
         sendObject: {
-            type: Object,
+            type: Object
         },
         type: {
             type: Number,
