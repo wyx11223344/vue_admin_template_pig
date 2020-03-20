@@ -103,8 +103,8 @@
         layout="sizes ,prev, pager, next, jumper"
         :total="table_page.total"
         @current-change="fetchData"
-        @size-change="fetchData(1)">
-      </el-pagination>
+        @size-change="fetchData(1)"
+      />
     </div>
     <change-user :send-user="sendUser" :is-show="showChange" @get_list="fetchData(1)" @close="showChange = false" />
   </div>

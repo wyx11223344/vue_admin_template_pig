@@ -3,7 +3,7 @@
     <div class="choose_bulk">
       <span>图片类型：</span>
       <el-select v-model="picType" clearable size="mini" class="select_change" placeholder="选择图片类型" @change="fetchData(1)">
-        <el-option v-for="item in selectList" :key="item" :value="item" :label="item | picTypeFilter"></el-option>
+        <el-option v-for="item in selectList" :key="item" :value="item" :label="item | picTypeFilter" />
       </el-select>
       <span>创建时间：</span>
       <el-date-picker
@@ -15,8 +15,8 @@
         end-placeholder="结束日期"
         size="mini"
         value-format="timestamp"
-        @change="fetchData(1)">
-      </el-date-picker>
+        @change="fetchData(1)"
+      />
       <el-button type="success" size="mini" @click="reset()">重置</el-button>
     </div>
     <div class="head-control">
@@ -42,7 +42,11 @@
       </el-table-column>
       <el-table-column align="center" label="图片" width="150">
         <template slot-scope="scope">
-          <el-image class="show-pic-in" :src="`${baseStaticUrl}${scope.row.type}${scope.row.pic_url}`">
+          <el-image
+            class="show-pic-in"
+            :src="`${baseStaticUrl}${scope.row.type}${scope.row.pic_url}`"
+            :preview-src-list="[`${ baseStaticUrl}${scope.row.type}${scope.row.pic_url}`]"
+          >
             <div slot="error" class="image-slot">
               <i class="el-icon-picture-outline" />
             </div>
@@ -93,8 +97,8 @@
         layout="sizes ,prev, pager, next, jumper"
         :total="table_page.total"
         @current-change="fetchData"
-        @size-change="fetchData(1)">
-      </el-pagination>
+        @size-change="fetchData(1)"
+      />
     </div>
     <picture-change v-model="isShowChange" :add-new="isAdd" :send-pic="sendPic" @list_get="fetchData(table_page.currentPage)" />
   </div>

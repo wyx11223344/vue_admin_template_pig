@@ -56,10 +56,14 @@ export default {
     },
     props: {
         isShow: {
-            type: Boolean
+            type: Boolean,
+            default: false
         },
         sendPic: {
-            type: Object
+            type: Object,
+            default: () => {
+                return {}
+            }
         },
         addNew: {
             type: Boolean,
