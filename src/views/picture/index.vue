@@ -42,7 +42,7 @@
       </el-table-column>
       <el-table-column align="center" label="图片" width="150">
         <template slot-scope="scope">
-          <el-image class="show-pic-in" :src="`http://static.mrwanmisshen.com${scope.row.type}${scope.row.pic_url}`">
+          <el-image class="show-pic-in" :src="`${baseStaticUrl}${scope.row.type}${scope.row.pic_url}`">
             <div slot="error" class="image-slot">
               <i class="el-icon-picture-outline" />
             </div>

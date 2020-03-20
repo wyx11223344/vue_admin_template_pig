@@ -34,6 +34,7 @@ Vue.use(specialUi)// 全部注册
 Vue.use(directive)
 Vue.use(ElementUI)
 Vue.prototype.$echarts = echarts // 引入组件
+Vue.prototype.baseStaticUrl = 'http://193.112.145.172:8000'
 
 Vue.config.productionTip = false
 

@@ -91,7 +91,7 @@ export default {
          * 获取图片地址
          */
         imageUrl() {
-            return `http://static.mrwanmisshen.com${this.form.type}${this.form.pic_url}`
+            return `${this.baseStaticUrl}${this.form.type}${this.form.pic_url}`
         },
         /**
          * 获取图片名称

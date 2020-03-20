@@ -30,7 +30,7 @@
                     :value="item.pic_url"
                     :label="item.pic_url")
             .select-option {{item.pic_url}}
-              el-image.select_img.rt(:src="`http://static.mrwanmisshen.com${item.type}${item.pic_url}`")
+              el-image.select_img.rt(:src="`${baseStaticUrl}${item.type}${item.pic_url}`")
         a(style="color: #409EFF" @click="$router.push('/picture/table')") 竟然没有想要的图片？？？添加！
       el-form-item(label="背景颜色" prop="bgc")
         el-color-picker(v-model="form.bgc" @active-change="colorChange")

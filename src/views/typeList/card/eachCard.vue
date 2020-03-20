@@ -12,7 +12,7 @@
       el-button(v-if="type === 0" style="float: right; padding: 3px 5px" type="text" @click="type_change(1)") 恢复
     .main-show
       .left-show(:style="{backgroundColor:sendObject.bgc}")
-        el-image(:src="'http://static.mrwanmisshen.com/typeList/'+ sendObject.icon_name")
+        el-image(:src="baseStaticUrl + sendObject.icon_name")
           div(slot="error" class="image-slot")
             svg-icon.img-error(icon-class="pic")
       .right-show
