@@ -22,7 +22,6 @@
                       key="file"
                       :width="200"
                       :height="200"
-                      lang-type="en"
                       :params="form"
                       @close1="close1"
                       @fileSend="imgChange(arguments)")
