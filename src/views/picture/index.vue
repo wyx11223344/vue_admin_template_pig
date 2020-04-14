@@ -100,7 +100,7 @@
         @size-change="fetchData(1)"
       />
     </div>
-    <picture-change v-model="isShowChange" :add-new="isAdd" :send-pic="sendPic" @list_get="fetchData(table_page.currentPage)" />
+    <picture-change v-model="isShowChange" :add-new="isAdd" :send-pic="sendPic" @list_get="fetchData(table_page.currentPage),checkGet()" />
   </div>
 </template>
 
