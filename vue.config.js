@@ -31,14 +31,14 @@ module.exports = {
             errors: true
         },
         proxy: {
-            '/': {
-                target: 'http://193.112.145.172:8068',
-                changeOrigin: true
-            }
             // '/': {
-            //     target: 'http://localhost:8068',
+            //     target: 'http://36.111.183.168:8888',
             //     changeOrigin: true
             // }
+            '/': {
+                target: 'http://localhost:8068',
+                changeOrigin: true
+            }
         }
     },
     configureWebpack: {
